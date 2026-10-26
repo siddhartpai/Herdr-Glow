@@ -6,8 +6,8 @@
 <text x='48' y='52' fill='#ffffff88' font-size='11' text-anchor='end' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>2</text>
 <text x='48' y='264' fill='#ffffff88' font-size='11' text-anchor='end' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>0</text>
 <text x='56' y='286' fill='#ffffff88' font-size='11' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>2026-10-13</text>
-<text x='696' y='286' fill='#ffffff88' font-size='11' text-anchor='end' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>2026-10-25</text>
-<polygon points='56.0,260 56.0,260.0 109.3,154.0 162.7,154.0 216.0,154.0 269.3,154.0 322.7,154.0 376.0,154.0 429.3,154.0 482.7,154.0 536.0,154.0 589.3,154.0 642.7,48.0 696.0,48.0 696.0,260' fill='#428fff22'/>
-<polyline points='56.0,260.0 109.3,154.0 162.7,154.0 216.0,154.0 269.3,154.0 322.7,154.0 376.0,154.0 429.3,154.0 482.7,154.0 536.0,154.0 589.3,154.0 642.7,48.0 696.0,48.0' fill='none' stroke='#428fff' stroke-width='2.5' stroke-linejoin='round'/>
+<text x='696' y='286' fill='#ffffff88' font-size='11' text-anchor='end' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>2026-10-26</text>
+<polygon points='56.0,260 56.0,260.0 105.2,154.0 154.5,154.0 203.7,154.0 252.9,154.0 302.2,154.0 351.4,154.0 400.6,154.0 449.8,154.0 499.1,154.0 548.3,154.0 597.5,48.0 646.8,48.0 696.0,48.0 696.0,260' fill='#428fff22'/>
+<polyline points='56.0,260.0 105.2,154.0 154.5,154.0 203.7,154.0 252.9,154.0 302.2,154.0 351.4,154.0 400.6,154.0 449.8,154.0 499.1,154.0 548.3,154.0 597.5,48.0 646.8,48.0 696.0,48.0' fill='none' stroke='#428fff' stroke-width='2.5' stroke-linejoin='round'/>
 <circle cx='696.0' cy='48.0' r='4' fill='#428fff'/>
 </svg>
