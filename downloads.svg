@@ -6,8 +6,8 @@
 <text x='48' y='52' fill='#ffffff88' font-size='11' text-anchor='end' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>3</text>
 <text x='48' y='264' fill='#ffffff88' font-size='11' text-anchor='end' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>0</text>
 <text x='56' y='286' fill='#ffffff88' font-size='11' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>2026-10-13</text>
-<text x='696' y='286' fill='#ffffff88' font-size='11' text-anchor='end' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>2026-11-01</text>
-<polygon points='56.0,260 56.0,260.0 89.7,189.3 123.4,189.3 157.1,189.3 190.7,189.3 224.4,189.3 258.1,189.3 291.8,189.3 325.5,189.3 359.2,189.3 392.8,189.3 426.5,118.7 460.2,118.7 493.9,118.7 527.6,118.7 561.3,118.7 594.9,118.7 628.6,118.7 662.3,118.7 696.0,48.0 696.0,260' fill='#428fff22'/>
-<polyline points='56.0,260.0 89.7,189.3 123.4,189.3 157.1,189.3 190.7,189.3 224.4,189.3 258.1,189.3 291.8,189.3 325.5,189.3 359.2,189.3 392.8,189.3 426.5,118.7 460.2,118.7 493.9,118.7 527.6,118.7 561.3,118.7 594.9,118.7 628.6,118.7 662.3,118.7 696.0,48.0' fill='none' stroke='#428fff' stroke-width='2.5' stroke-linejoin='round'/>
+<text x='696' y='286' fill='#ffffff88' font-size='11' text-anchor='end' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>2026-11-02</text>
+<polygon points='56.0,260 56.0,260.0 88.0,189.3 120.0,189.3 152.0,189.3 184.0,189.3 216.0,189.3 248.0,189.3 280.0,189.3 312.0,189.3 344.0,189.3 376.0,189.3 408.0,118.7 440.0,118.7 472.0,118.7 504.0,118.7 536.0,118.7 568.0,118.7 600.0,118.7 632.0,118.7 664.0,48.0 696.0,48.0 696.0,260' fill='#428fff22'/>
+<polyline points='56.0,260.0 88.0,189.3 120.0,189.3 152.0,189.3 184.0,189.3 216.0,189.3 248.0,189.3 280.0,189.3 312.0,189.3 344.0,189.3 376.0,189.3 408.0,118.7 440.0,118.7 472.0,118.7 504.0,118.7 536.0,118.7 568.0,118.7 600.0,118.7 632.0,118.7 664.0,48.0 696.0,48.0' fill='none' stroke='#428fff' stroke-width='2.5' stroke-linejoin='round'/>
 <circle cx='696.0' cy='48.0' r='4' fill='#428fff'/>
 </svg>
