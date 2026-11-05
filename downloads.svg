@@ -1,13 +1,13 @@
 <svg xmlns='http://www.w3.org/2000/svg' width='720' height='300' viewBox='0 0 720 300'>
 <rect width='100%' height='100%' rx='14' fill='#0d0e14'/>
 <text x='56' y='30' fill='#f4f4f6' font-size='16' font-weight='700' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>Herdr-Glow downloads</text>
-<text x='696' y='30' fill='#38db8c' font-size='16' font-weight='700' text-anchor='end' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>3 total</text>
+<text x='696' y='30' fill='#38db8c' font-size='16' font-weight='700' text-anchor='end' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>4 total</text>
 <line x1='56' y1='260' x2='696' y2='260' stroke='#ffffff22'/>
-<text x='48' y='52' fill='#ffffff88' font-size='11' text-anchor='end' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>3</text>
+<text x='48' y='52' fill='#ffffff88' font-size='11' text-anchor='end' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>4</text>
 <text x='48' y='264' fill='#ffffff88' font-size='11' text-anchor='end' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>0</text>
 <text x='56' y='286' fill='#ffffff88' font-size='11' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>2026-10-13</text>
-<text x='696' y='286' fill='#ffffff88' font-size='11' text-anchor='end' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>2026-11-04</text>
-<polygon points='56.0,260 56.0,260.0 85.1,189.3 114.2,189.3 143.3,189.3 172.4,189.3 201.5,189.3 230.5,189.3 259.6,189.3 288.7,189.3 317.8,189.3 346.9,189.3 376.0,118.7 405.1,118.7 434.2,118.7 463.3,118.7 492.4,118.7 521.5,118.7 550.5,118.7 579.6,118.7 608.7,48.0 637.8,48.0 666.9,48.0 696.0,48.0 696.0,260' fill='#428fff22'/>
-<polyline points='56.0,260.0 85.1,189.3 114.2,189.3 143.3,189.3 172.4,189.3 201.5,189.3 230.5,189.3 259.6,189.3 288.7,189.3 317.8,189.3 346.9,189.3 376.0,118.7 405.1,118.7 434.2,118.7 463.3,118.7 492.4,118.7 521.5,118.7 550.5,118.7 579.6,118.7 608.7,48.0 637.8,48.0 666.9,48.0 696.0,48.0' fill='none' stroke='#428fff' stroke-width='2.5' stroke-linejoin='round'/>
+<text x='696' y='286' fill='#ffffff88' font-size='11' text-anchor='end' font-family='-apple-system,Segoe UI,Helvetica,Arial,sans-serif'>2026-11-05</text>
+<polygon points='56.0,260 56.0,260.0 83.8,207.0 111.7,207.0 139.5,207.0 167.3,207.0 195.1,207.0 223.0,207.0 250.8,207.0 278.6,207.0 306.4,207.0 334.3,207.0 362.1,154.0 389.9,154.0 417.7,154.0 445.6,154.0 473.4,154.0 501.2,154.0 529.0,154.0 556.9,154.0 584.7,101.0 612.5,101.0 640.3,101.0 668.2,101.0 696.0,48.0 696.0,260' fill='#428fff22'/>
+<polyline points='56.0,260.0 83.8,207.0 111.7,207.0 139.5,207.0 167.3,207.0 195.1,207.0 223.0,207.0 250.8,207.0 278.6,207.0 306.4,207.0 334.3,207.0 362.1,154.0 389.9,154.0 417.7,154.0 445.6,154.0 473.4,154.0 501.2,154.0 529.0,154.0 556.9,154.0 584.7,101.0 612.5,101.0 640.3,101.0 668.2,101.0 696.0,48.0' fill='none' stroke='#428fff' stroke-width='2.5' stroke-linejoin='round'/>
 <circle cx='696.0' cy='48.0' r='4' fill='#428fff'/>
 </svg>
