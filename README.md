@@ -21,20 +21,20 @@ Herdr-Glow puts a small light on the right edge of your Mac screen. The light sh
 | Blue  | Agents are working. Nothing needs you. |
 | Red   | An agent waits for an answer. |
 | Green | A job is done. Hover for the summary. |
-| Grey  | herdr is not running. |
+| Grey  | herdr-core is not running. |
 
 ## Features
 
 - The panel shows the question that a waiting agent asks, with one button for each option.
 - Press 1–9 to answer, or type a free-text reply.
 - A finished agent shows a short summary of its work.
-- Click a card to open that agent's pane in herdr.
+- Click a card to bring the Herdr app to the front.
 - The light shows on every Space and over full-screen apps.
 - Six palettes: Default, Pastel, Neon, Sunset, Ocean and Mono.
 
 ## Install
 
-1. Download `Herdr-Glow-0.1.1-macos.zip` from the [latest release](https://github.com/siddhartpai/Herdr-Glow/releases/latest).
+1. Download `Herdr-Glow-0.2.0-macos.zip` from the [latest release](https://github.com/siddhartpai/Herdr-Glow/releases/latest).
 2. Unzip it and move `Herdr-Glow.app` to `/Applications`.
 3. Run this command in Terminal. The app is not notarized by Apple, so macOS blocks it until you remove the quarantine flag.
    ```sh
@@ -62,7 +62,7 @@ Herdr-Glow puts a small light on the right edge of your Mac screen. The light sh
 
 - macOS 14 or later
 - A Swift 6 toolchain (Xcode or the Command Line Tools)
-- herdr running. The app connects to `$HERDR_SOCKET_PATH`, or to `~/.config/herdr/herdr.sock`.
+- herdr-core running (the Herdr app starts it). The app connects to `~/.local/state/herdr-core/default/default.sock`.
 
 ## Development
 

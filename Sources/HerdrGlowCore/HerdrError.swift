@@ -13,10 +13,12 @@ public enum HerdrError: Error, Equatable, CustomStringConvertible {
         }
     }
 
-    /// Returns the error in a herdr `{"error": {...}}` response, or nil.
+    /// Returns the error in a herdr-core `{"error": {...}}` response, or nil.
+    /// The stable code is `data.kind`.
     init?(response: [String: Any]) {
         guard let error = response["error"] as? [String: Any] else { return nil }
-        self = .server(code: error["code"] as? String ?? "unknown",
+        let data = error["data"] as? [String: Any]
+        self = .server(code: data?["kind"] as? String ?? error["kind"] as? String ?? "unknown",
                        message: error["message"] as? String ?? "")
     }
 }

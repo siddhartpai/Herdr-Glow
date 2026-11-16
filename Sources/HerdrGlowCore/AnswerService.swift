@@ -38,7 +38,6 @@ public struct AnswerService: Sendable {
         try await ensureBlocked(paneID)
         if let freeText { try await api.sendKeys(paneID, [String(freeText.number)]) }
         try await api.sendText(paneID, text)
-        try await api.sendKeys(paneID, ["enter"])
     }
 
     /// Gives a finished or idle agent its next task. Refused while it waits or works,

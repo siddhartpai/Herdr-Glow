@@ -1,28 +1,37 @@
 import Testing
+import Foundation
 @testable import HerdrGlowCore
 
 private func agents(_ statuses: AgentStatus...) -> [Agent] {
     statuses.enumerated().map { Agent(paneID: "p\($0.offset)", title: "", cwd: "", status: $0.element) }
 }
 
-@Test func agentParsesFromAgentInfoJSON() {
-    let agent = Agent(json: ["pane_id": "w1:p1", "agent_status": "blocked",
-                             "terminal_title_stripped": "Fix bug", "cwd": "/tmp/a", "agent": "claude"])
-    #expect(agent == Agent(paneID: "w1:p1", title: "Fix bug", cwd: "/tmp/a", status: .blocked))
+@Test func agentParsesFromTerminalJSON() {
+    let agent = Agent(json: ["address": "t13", "title": "Fix bug", "cwd": "/tmp/shell",
+                             "foreground": ["cwd": "/tmp/a", "pid": 11307],
+                             "status": ["app": "claude-code", "state": "blocked"],
+                             "status_ms": 1794831193584, "turn": 4])
+    #expect(agent?.paneID == "t13")
+    #expect(agent?.title == "Fix bug")
+    #expect(agent?.cwd == "/tmp/a")
+    #expect(agent?.status == .blocked)
+    #expect(agent?.activity == 1794831193584)
+    #expect(agent?.completion == 4)
+    #expect(agent?.foregroundPID == 11307)
 }
 
-@Test func agentFallsBackToAgentNameWhenTitleEmpty() {
-    let agent = Agent(json: ["pane_id": "w1:p1", "agent_status": "idle",
-                             "terminal_title_stripped": "", "agent": "claude"])
-    #expect(agent?.title == "claude")
+@Test func agentFallsBackToAppNameWhenTitleEmpty() {
+    let agent = Agent(json: ["address": "t1", "title": "", "status": ["app": "claude-code", "state": "idle"]])
+    #expect(agent?.title == "claude-code")
 }
 
 @Test func unknownStatusMapsToUnknown() {
-    #expect(Agent(json: ["pane_id": "w1:p1", "agent_status": "sleeping"])?.status == .unknown)
+    #expect(Agent(json: ["address": "t1", "status": ["state": "error"]])?.status == .unknown)
 }
 
-@Test func agentWithoutPaneIDIsRejected() {
-    #expect(Agent(json: ["agent_status": "idle"]) == nil)
+@Test func terminalWithoutStatusIsNotAnAgent() {
+    #expect(Agent(json: ["address": "t1", "status": NSNull()]) == nil)
+    #expect(Agent(json: ["status": ["state": "idle"]]) == nil)
 }
 
 @Test func greyWhenDisconnected() {
@@ -58,8 +67,4 @@ private func agents(_ statuses: AgentStatus...) -> [Agent] {
 
 @Test func calmWhenNoAgents() {
     #expect(LightColor.compute(connected: true, agents: []) == .calm)
-}
-
-@Test func agentReadsCompletionSeq() {
-    #expect(Agent(json: ["pane_id": "w1:p1", "agent_status": "done", "completion_seq": 826])?.completion == 826)
 }

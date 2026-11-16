@@ -135,7 +135,7 @@
         <div class="feature"><h3>See the question</h3><p>The panel shows the question the agent asks, with one button for each option.</p></div>
         <div class="feature"><h3>Answer with one key</h3><p>Press 1–9 to select an option, or type a free-text reply.</p></div>
         <div class="feature"><h3>Read the summary</h3><p>A finished agent shows a short summary of its work, from its transcript.</p></div>
-        <div class="feature"><h3>Jump to the agent</h3><p>Click a card to open that agent's pane in herdr.</p></div>
+        <div class="feature"><h3>Jump to Herdr</h3><p>Click a card to bring the Herdr app to the front.</p></div>
         <div class="feature"><h3>Recent agents first</h3><p>Agent names follow the title of their work. The most recent agents are at the top.</p></div>
         <div class="feature"><h3>Six palettes</h3><p>Default, Pastel, Neon, Sunset, Ocean and Mono. Pick one in the panel footer.</p></div>
       </div>
@@ -146,13 +146,13 @@
       <h2>Install</h2>
       <p class="lead">Download the app for macOS 14 or later. It runs on Apple silicon and Intel Macs.</p>
       <ol class="steps">
-        <li><div>Download <code>Herdr-Glow-0.1.1-macos.zip</code> from the <a href="https://github.com/siddhartpai/Herdr-Glow/releases/latest" data-umami-event="download-click" data-umami-event-place="install">latest release</a>.</div></li>
+        <li><div>Download <code>Herdr-Glow-0.2.0-macos.zip</code> from the <a href="https://github.com/siddhartpai/Herdr-Glow/releases/latest" data-umami-event="download-click" data-umami-event-place="install">latest release</a>.</div></li>
         <li><div>Unzip it and move <code>Herdr-Glow.app</code> to <code>/Applications</code>.</div></li>
         <li><div>Run this command in Terminal. The app is not notarized by Apple, so macOS blocks it until you remove the quarantine flag.<pre>xattr -cr /Applications/Herdr-Glow.app</pre></div></li>
         <li><div>Open the app. The light appears on the right edge of your main screen.</div></li>
       </ol>
       <p class="req">To build from source, clone the repository and run <code>scripts/bundle.sh</code>. You need a Swift 6 toolchain (Xcode or the Command Line Tools).</p>
-      <p class="req">Requirements: macOS 14 or later and herdr running. The app connects to the herdr socket at <code>$HERDR_SOCKET_PATH</code>, or <code>~/.config/herdr/herdr.sock</code>.</p>
+      <p class="req">Requirements: macOS 14 or later and herdr-core running (the Herdr app starts it). The app connects to <code>~/.local/state/herdr-core/default/default.sock</code>.</p>
     </section>
 
     <footer>

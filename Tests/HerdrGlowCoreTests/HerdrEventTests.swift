@@ -2,66 +2,61 @@ import Testing
 import Foundation
 @testable import HerdrGlowCore
 
-@Test func parsesStatusChangedEvent() {
-    let event = HerdrEvent.parse([
-        "event": "pane.agent_status_changed",
-        "data": ["pane_id": "w1:p1", "workspace_id": "w1", "agent_status": "blocked"],
-    ])
-    #expect(event == .statusChanged(paneID: "w1:p1", status: .blocked))
+private func line(_ json: String) -> [String: Any] {
+    try! JSONSerialization.jsonObject(with: Data(json.utf8)) as! [String: Any]
 }
 
-@Test func paneLifecycleEventsAreTopologyChanges() {
-    for name in ["pane.created", "pane.closed", "pane.exited", "pane.agent_detected"] {
-        #expect(HerdrEvent.parse(["event": name, "data": [:]]) == .topologyChanged)
-    }
+@Test func parsesStatusEvent() {
+    let event = HerdrEvent.parse(line(#"{"jsonrpc":"2.0","method":"event","params":{"data":{"records":{},"reported":true,"status":{"app":"claude-code","msg":"Reading","state":"working"}},"seq":430,"terminal":"t13","type":"status"}}"#))
+    #expect(event == .statusChanged(paneID: "t13", status: .working))
 }
 
-@Test func underscoreEventNamesFromLiveHerdrAreParsed() {
-    for name in ["pane_created", "pane_closed", "pane_exited", "pane_agent_detected"] {
-        #expect(HerdrEvent.parse(["event": name, "data": [:]]) == .topologyChanged)
+@Test func statusWithoutStateIsCleared() {
+    let event = HerdrEvent.parse(line(#"{"jsonrpc":"2.0","method":"event","params":{"data":{"status":null},"seq":1,"terminal":"t13","type":"status"}}"#))
+    #expect(event == .statusCleared(paneID: "t13"))
+}
+
+@Test func lifecycleEventsAreTopologyChanges() {
+    for type in ["created", "lost", "restarted", "finished", "removed"] {
+        let object: [String: Any] = ["method": "event", "params": ["type": type, "terminal": "t1", "data": [:]]]
+        #expect(HerdrEvent.parse(object) == .topologyChanged)
     }
-    let event = HerdrEvent.parse([
-        "event": "pane_agent_status_changed",
-        "data": ["pane_id": "w1:p1", "workspace_id": "w1", "agent_status": "blocked"],
-    ])
-    #expect(event == .statusChanged(paneID: "w1:p1", status: .blocked))
+    #expect(HerdrEvent.parse(["method": "missed", "params": [:]]) == .topologyChanged)
 }
 
 @Test func otherEventsAreIgnored() {
-    #expect(HerdrEvent.parse(["event": "pane.scroll_changed", "data": [:]]) == nil)
-    #expect(HerdrEvent.parse(["id": "1", "result": ["type": "subscription_started"]]) == nil)
+    #expect(HerdrEvent.parse(line(#"{"jsonrpc":"2.0","method":"event","params":{"data":{"labels":{}},"seq":425,"terminal":"t14","type":"labels"}}"#)) == nil)
+    #expect(HerdrEvent.parse(line(#"{"jsonrpc":"2.0","method":"heartbeat","params":{"seq":427}}"#)) == nil)
+    #expect(HerdrEvent.parse(["id": "sub", "result": ["seq": 1, "terminals": []]]) == nil)
 }
 
 @MainActor @Test func subscribeDeliversEventsThenReportsClose() async throws {
     let server = try FakeHerdrServer { _ in [
-        #"{"id":"sub","result":{"type":"subscription_started"}}"#,
-        #"{"event":"pane.agent_status_changed","data":{"pane_id":"w1:p1","workspace_id":"w1","agent_status":"working"}}"#,
+        #"{"jsonrpc":"2.0","id":"sub","result":{"seq":422,"terminals":[]}}"#,
+        #"{"jsonrpc":"2.0","method":"heartbeat","params":{"seq":422}}"#,
+        #"{"jsonrpc":"2.0","method":"event","params":{"data":{"status":{"app":"claude-code","state":"blocked"}},"seq":423,"terminal":"t5","type":"status"}}"#,
     ] }
     defer { server.stop() }
     let events = Box<[HerdrEvent]>([])
     let closed = Box(false)
     let sub = HerdrClient(socketPath: server.path).subscribe(
-        paneIDs: ["w1:p1"],
         onEvent: { events.value.append($0) },
         onClose: { _ in closed.value = true })
     #expect(await eventually { closed.value })
-    #expect(events.value == [.statusChanged(paneID: "w1:p1", status: .working)])
-    let params = server.requests.first?["params"] as? [String: Any]
-    let subs = params?["subscriptions"] as? [[String: String]] ?? []
+    #expect(events.value == [.statusChanged(paneID: "t5", status: .blocked)])
     #expect(server.requests.first?["method"] as? String == "events.subscribe")
-    #expect(subs.contains(["type": "pane.agent_status_changed", "pane_id": "w1:p1"]))
-    #expect(subs.contains(["type": "pane.created"]))
+    #expect(server.requests.first?["jsonrpc"] as? String == "2.0")
     sub.cancel()
 }
 
 @MainActor @Test func cancelDoesNotReportClose() async throws {
     let server = try FakeHerdrServer(holdOpen: 2) { _ in [
-        #"{"id":"sub","result":{"type":"subscription_started"}}"#,
+        #"{"jsonrpc":"2.0","id":"sub","result":{"seq":1,"terminals":[]}}"#,
     ] }
     defer { server.stop() }
     let closed = Box(false)
     let sub = HerdrClient(socketPath: server.path).subscribe(
-        paneIDs: [], onEvent: { _ in }, onClose: { _ in closed.value = true })
+        onEvent: { _ in }, onClose: { _ in closed.value = true })
     try await Task.sleep(for: .milliseconds(200))
     sub.cancel()
     try await Task.sleep(for: .milliseconds(300))

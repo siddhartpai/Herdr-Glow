@@ -81,7 +81,7 @@ public final class PanelModel {
     public func reload(_ paneID: String) async {
         do {
             // The visible screen has blank rows below the prompt, so read enough to reach option 1.
-            screens[paneID] = try await api.read(paneID, lines: 80)
+            screens[paneID] = try await api.read(paneID, lines: 0)
         } catch {
             errors[paneID] = String(describing: error)
         }

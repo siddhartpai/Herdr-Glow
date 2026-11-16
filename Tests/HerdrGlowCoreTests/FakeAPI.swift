@@ -21,7 +21,6 @@ final class FakeAPI: HerdrAPI, @unchecked Sendable {
     var texts: [Call] = []
     var prompts: [Call] = []
     var focused: [String] = []
-    private(set) var subscribedPaneIDs: [String] = []
     private(set) var subscriptions: [FakeSubscription] = []
     private var onEvent: (@Sendable (HerdrEvent) -> Void)?
     private var onClose: (@Sendable (Error) -> Void)?
@@ -58,10 +57,8 @@ final class FakeAPI: HerdrAPI, @unchecked Sendable {
 
     func focus(_ paneID: String) async throws { focused.append(paneID) }
 
-    func subscribe(paneIDs: [String],
-                   onEvent: @escaping @Sendable (HerdrEvent) -> Void,
+    func subscribe(onEvent: @escaping @Sendable (HerdrEvent) -> Void,
                    onClose: @escaping @Sendable (Error) -> Void) -> HerdrSubscription {
-        subscribedPaneIDs = paneIDs
         self.onEvent = onEvent
         self.onClose = onClose
         let subscription = FakeSubscription()

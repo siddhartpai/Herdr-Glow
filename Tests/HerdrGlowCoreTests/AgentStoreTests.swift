@@ -1,14 +1,14 @@
 import Testing
 @testable import HerdrGlowCore
 
-@MainActor @Test func refreshLoadsAgentsAndSubscribesToTheirPanes() async {
+@MainActor @Test func refreshLoadsAgentsAndSubscribes() async {
     let api = FakeAPI()
     api.agents = [agent("w1:p1", .working), agent("w1:p2", .blocked)]
     let store = AgentStore(api: api)
     await store.refresh()
     #expect(store.connected)
     #expect(store.color == .red)
-    #expect(api.subscribedPaneIDs == ["w1:p1", "w1:p2"])
+    #expect(api.subscriptions.count == 1)
     #expect(store.blocked.map(\.paneID) == ["w1:p2"])
     #expect(store.others.map(\.paneID) == ["w1:p1"])
 }
@@ -29,9 +29,54 @@ import Testing
     await store.refresh()
     api.agents.append(agent("w2:p1", .blocked))
     api.emit(.topologyChanged)
-    #expect(await eventually { api.subscribedPaneIDs == ["w1:p1", "w2:p1"] })
+    #expect(await eventually { api.subscriptions.count == 2 })
     #expect(store.color == .red)
     #expect(api.subscriptions.first?.cancelled == true)
+}
+
+@MainActor @Test func statusFromUnknownTerminalReloads() async {
+    let api = FakeAPI()
+    api.agents = [agent("t1", .idle)]
+    let store = AgentStore(api: api)
+    await store.refresh()
+    api.agents.append(agent("t2", .blocked))
+    api.emit(.statusChanged(paneID: "t2", status: .blocked))
+    #expect(await eventually { store.color == .red })
+}
+
+@MainActor @Test func repeatedDoneCountsOneFinish() async {
+    let api = FakeAPI()
+    api.agents = [agent("t1", .working)]
+    let store = AgentStore(api: api)
+    await store.refresh()
+    store.apply(.statusChanged(paneID: "t1", status: .done))
+    #expect(store.color == .green)
+    store.markSeen(["t1"])
+    store.apply(.statusChanged(paneID: "t1", status: .done))
+    #expect(store.color == .calm)
+}
+
+@MainActor @Test func clearedStatusOfUnknownTerminalDoesNotReload() async {
+    let api = FakeAPI()
+    api.agents = [agent("t1", .idle)]
+    let store = AgentStore(api: api)
+    await store.refresh()
+    store.apply(.statusCleared(paneID: "t9"))
+    try? await Task.sleep(for: .milliseconds(100))
+    #expect(api.listCalls == 1)
+    store.apply(.statusCleared(paneID: "t1"))
+    #expect(await eventually { api.listCalls == 2 })
+}
+
+@MainActor @Test func reloadNamesKeepsKnownSession() async {
+    let api = FakeAPI()
+    api.agents = [Agent(paneID: "t1", title: "a", cwd: "/tmp", status: .idle, sessionID: "s1")]
+    let store = AgentStore(api: api)
+    await store.refresh()
+    api.agents = [Agent(paneID: "t1", title: "b", cwd: "/tmp", status: .idle)]
+    await store.reloadNames()
+    #expect(store.agents.first?.sessionID == "s1")
+    #expect(store.agents.first?.title == "b")
 }
 
 @MainActor @Test func listFailureShowsGreyThenRecovers() async {
@@ -52,11 +97,6 @@ import Testing
     await store.refresh()
     api.close(HerdrError.socket("connection closed"))
     #expect(await eventually { api.listCalls == 2 && store.connected })
-}
-
-@Test func agentReadsActivityFromStateChangeSeq() {
-    let agent = Agent(json: ["pane_id": "w1:p1", "agent_status": "idle", "state_change_seq": 830])
-    #expect(agent?.activity == 830)
 }
 
 @MainActor @Test func mostRecentAgentsComeFirst() async {

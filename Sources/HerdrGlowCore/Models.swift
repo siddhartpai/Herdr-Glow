@@ -11,10 +11,12 @@ public struct Agent: Identifiable, Equatable, Sendable {
     public var status: AgentStatus
     /// Claude Code session id, used to find the transcript.
     public var sessionID: String?
-    /// Higher means the agent's state changed more recently (herdr `state_change_seq`).
+    /// Higher means the agent's state changed more recently (herdr-core `status_ms`).
     public var activity: Int = 0
-    /// Bumped each time the agent finishes a job (herdr `completion_seq`).
+    /// Bumped each time the agent finishes a job (herdr-core `turn`).
     public var completion: Int = 0
+    /// Process id of the program in the terminal, used to find its Claude Code session.
+    public var foregroundPID: Int?
     public var id: String { paneID }
 
     public init(paneID: String, title: String, cwd: String, status: AgentStatus, sessionID: String? = nil) {
@@ -25,19 +27,21 @@ public struct Agent: Identifiable, Equatable, Sendable {
         self.sessionID = sessionID
     }
 
-    /// Builds an agent from a herdr `AgentInfo` object.
+    /// Builds an agent from a herdr-core `Terminal`. Terminals whose program never
+    /// reported a status are not agents.
     init?(json: [String: Any]) {
-        guard let paneID = json["pane_id"] as? String,
-              let status = json["agent_status"] as? String else { return nil }
-        let title = json["terminal_title_stripped"] as? String
+        guard let paneID = json["address"] as? String,
+              let status = json["status"] as? [String: Any],
+              let state = status["state"] as? String else { return nil }
+        let title = json["title"] as? String
+        let foreground = json["foreground"] as? [String: Any]
         self.paneID = paneID
-        self.title = (title?.isEmpty == false ? title : nil) ?? (json["agent"] as? String) ?? paneID
-        self.cwd = json["cwd"] as? String ?? ""
-        self.status = AgentStatus(rawValue: status) ?? .unknown
-        let session = json["agent_session"] as? [String: Any]
-        self.sessionID = session?["kind"] as? String == "id" ? session?["value"] as? String : nil
-        self.activity = json["state_change_seq"] as? Int ?? 0
-        self.completion = json["completion_seq"] as? Int ?? 0
+        self.title = (title?.isEmpty == false ? title : nil) ?? (status["app"] as? String) ?? paneID
+        self.cwd = foreground?["cwd"] as? String ?? json["cwd"] as? String ?? ""
+        self.status = AgentStatus(rawValue: state) ?? .unknown
+        self.activity = json["status_ms"] as? Int ?? 0
+        self.completion = json["turn"] as? Int ?? 0
+        self.foregroundPID = foreground?["pid"] as? Int
     }
 }
 

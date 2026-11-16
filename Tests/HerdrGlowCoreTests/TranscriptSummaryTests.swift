@@ -69,15 +69,6 @@ private func tool(_ name: String, _ input: [String: Any]) -> [String: Any] {
     #expect(TranscriptSummary.load(sessionID: "abc-123", projectsDir: root)?.lastRequest == "Hi")
 }
 
-@Test func claudeSessionIDIsReadFromAgentInfo() {
-    let info: [String: Any] = ["pane_id": "w1:p1", "agent_status": "idle", "agent": "claude",
-                               "agent_session": ["agent": "claude", "kind": "id", "value": "abc-123"]]
-    #expect(Agent(json: info)?.sessionID == "abc-123")
-    var path = info
-    path["agent_session"] = ["agent": "claude", "kind": "path", "value": "/x"]
-    #expect(Agent(json: path)?.sessionID == nil)
-}
-
 @MainActor @Test func toggleSummaryLoadsAndCollapses() async {
     let api = FakeAPI()
     var claude = agent("w1:p1", .done)

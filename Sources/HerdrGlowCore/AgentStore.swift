@@ -29,14 +29,13 @@ public final class AgentStore {
         Task { await refresh() }
     }
 
-    /// Reloads the agent list and re-subscribes to status events for its panes.
+    /// Reloads the agent list and re-subscribes to events.
     public func refresh() async {
         do {
             agents = try await api.listAgents()
             connected = true
             subscription?.cancel()
             subscription = api.subscribe(
-                paneIDs: agents.map(\.paneID),
                 onEvent: { [weak self] event in Task { @MainActor in self?.apply(event) } },
                 onClose: { [weak self] _ in Task { @MainActor in self?.disconnected() } })
         } catch {
@@ -50,7 +49,7 @@ public final class AgentStore {
         for fresh in latest {
             guard let index = agents.firstIndex(where: { $0.paneID == fresh.paneID }) else { continue }
             agents[index].title = fresh.title
-            agents[index].sessionID = fresh.sessionID
+            agents[index].sessionID = fresh.sessionID ?? agents[index].sessionID
         }
     }
 
@@ -64,10 +63,17 @@ public final class AgentStore {
         switch event {
         case let .statusChanged(paneID, status):
             if let index = agents.firstIndex(where: { $0.paneID == paneID }) {
+                // herdr-core repeats a status when only its message changes; count a finish once.
+                let finished = status == .done && agents[index].status != .done
                 agents[index].status = status
                 agents[index].activity = (agents.map(\.activity).max() ?? 0) + 1
-                if status == .done { agents[index].completion += 1 }
+                if finished { agents[index].completion += 1 }
+            } else {
+                // A program in a known terminal started to report, so it is a new agent.
+                Task { await refresh() }
             }
+        case let .statusCleared(paneID):
+            if agents.contains(where: { $0.paneID == paneID }) { Task { await refresh() } }
         case .topologyChanged:
             Task { await refresh() }
         }

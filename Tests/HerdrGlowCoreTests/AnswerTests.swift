@@ -26,12 +26,12 @@ import Testing
     #expect(api.texts.isEmpty)
 }
 
-@Test func replyWithoutOptionsTypesTextThenEnter() async throws {
+@Test func replyWithoutOptionsSendsTextOnly() async throws {
     let api = FakeAPI()
     api.agents = [agent("w1:p1", .blocked)]
     try await AnswerService(api: api).reply(text: "use main", paneID: "w1:p1", options: [])
     #expect(api.texts == [Call(pane: "w1:p1", value: "use main")])
-    #expect(api.sentKeys == [Call(pane: "w1:p1", value: "enter")])
+    #expect(api.sentKeys.isEmpty)
 }
 
 @Test func replyToMenuSelectsTypeSomethingFirst() async throws {
@@ -40,7 +40,7 @@ import Testing
     let options = [PromptOption(number: 1, label: "a.txt"), PromptOption(number: 2, label: "b.txt"),
                    PromptOption(number: 3, label: "Type something.")]
     try await AnswerService(api: api).reply(text: "c.txt", paneID: "w1:p1", options: options)
-    #expect(api.sentKeys == [Call(pane: "w1:p1", value: "3"), Call(pane: "w1:p1", value: "enter")])
+    #expect(api.sentKeys == [Call(pane: "w1:p1", value: "3")])
     #expect(api.texts == [Call(pane: "w1:p1", value: "c.txt")])
 }
 

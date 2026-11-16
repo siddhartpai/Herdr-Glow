@@ -13,74 +13,77 @@ public protocol HerdrAPI: Sendable {
     /// Submits a new task to an agent that is not waiting on a question.
     func prompt(_ paneID: String, _ text: String) async throws
     func focus(_ paneID: String) async throws
-    func subscribe(paneIDs: [String],
-                   onEvent: @escaping @Sendable (HerdrEvent) -> Void,
+    func subscribe(onEvent: @escaping @Sendable (HerdrEvent) -> Void,
                    onClose: @escaping @Sendable (Error) -> Void) -> HerdrSubscription
 }
 
-/// Talks to the herdr server over its Unix socket. One connection per request.
+/// Talks to herdr-core over its Unix socket (JSON-RPC 2.0, one message per line).
+/// One connection per request.
 public final class HerdrClient: HerdrAPI {
     public let socketPath: String
+    /// Where Claude Code writes `<pid>.json` with the session id of each running process.
+    let claudeSessionsDir: URL
 
-    public init(socketPath: String = HerdrClient.defaultSocketPath) {
+    public init(socketPath: String = HerdrClient.defaultSocketPath,
+                claudeSessionsDir: URL = HerdrClient.defaultClaudeSessionsDir) {
         self.socketPath = socketPath
+        self.claudeSessionsDir = claudeSessionsDir
     }
 
     public static var defaultSocketPath: String {
-        ProcessInfo.processInfo.environment["HERDR_SOCKET_PATH"]
-            ?? NSHomeDirectory() + "/.config/herdr/herdr.sock"
+        NSHomeDirectory() + "/.local/state/herdr-core/default/default.sock"
+    }
+
+    public static var defaultClaudeSessionsDir: URL {
+        URL(fileURLWithPath: NSHomeDirectory()).appendingPathComponent(".claude/sessions")
     }
 
     public func listAgents() async throws -> [Agent] {
-        let result = try await call("agent.list", [:])
-        let list = result["agents"] as? [[String: Any]] ?? []
-        return list.compactMap(Agent.init(json:))
+        let result = try await call("terminal.list", [:])
+        let list = result["terminals"] as? [[String: Any]] ?? []
+        return list.compactMap(Agent.init(json:)).map(withSession)
     }
 
     public func getAgent(_ paneID: String) async throws -> Agent {
-        let result = try await call("agent.get", ["target": paneID])
-        guard let json = result["agent"] as? [String: Any], let agent = Agent(json: json) else {
-            throw HerdrError.badResponse
-        }
-        return agent
+        let result = try await call("terminal.get", ["terminal": paneID])
+        guard let agent = Agent(json: result) else { throw HerdrError.badResponse }
+        return withSession(agent)
     }
 
-    /// Reads the visible screen. herdr refuses longer "recent" reads while an agent is blocked.
+    /// Reads the screen. `lines` is the history above it.
     public func read(_ paneID: String, lines: Int) async throws -> String {
-        let result = try await call("agent.read", ["target": paneID, "source": "visible", "lines": lines])
-        guard let read = result["read"] as? [String: Any], let text = read["text"] as? String else {
-            throw HerdrError.badResponse
-        }
+        let result = try await call("terminal.read", ["terminal": paneID, "lines": lines])
+        guard let text = result["text"] as? String else { throw HerdrError.badResponse }
         return text
     }
 
     public func sendKeys(_ paneID: String, _ keys: [String]) async throws {
-        _ = try await call("agent.send_keys", ["target": paneID, "keys": keys])
+        _ = try await call("terminal.keys", ["terminal": paneID, "keys": keys])
     }
 
-    /// Types literal text into the pane. herdr refuses `agent.prompt` while an agent is blocked.
+    /// Pastes text and presses Enter, even while the agent is blocked on a question.
     public func sendText(_ paneID: String, _ text: String) async throws {
-        _ = try await call("pane.send_text", ["pane_id": paneID, "text": text])
+        _ = try await call("terminal.send", ["terminal": paneID, "text": text, "force": true])
     }
 
     public func prompt(_ paneID: String, _ text: String) async throws {
-        _ = try await call("agent.prompt", ["target": paneID, "text": text])
+        _ = try await call("terminal.send", ["terminal": paneID, "text": text])
     }
 
+    /// herdr-core has no focus method, so this brings the Herdr app to the front.
     public func focus(_ paneID: String) async throws {
-        _ = try await call("agent.focus", ["target": paneID])
+        let open = Process()
+        open.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+        open.arguments = ["-b", "dev.herdr.app"]
+        try open.run()
     }
 
     /// Opens a long-lived connection for events. `onClose` is not called after `cancel()`.
-    public func subscribe(paneIDs: [String],
-                          onEvent: @escaping @Sendable (HerdrEvent) -> Void,
+    public func subscribe(onEvent: @escaping @Sendable (HerdrEvent) -> Void,
                           onClose: @escaping @Sendable (Error) -> Void) -> HerdrSubscription {
         let subscription = SocketSubscription()
         let path = socketPath
-        let subscriptions = HerdrEvent.topologyEvents.map { ["type": $0] }
-            + paneIDs.map { ["type": "pane.agent_status_changed", "pane_id": $0] }
-        let request: [String: Any] = ["id": "sub", "method": "events.subscribe",
-                                      "params": ["subscriptions": subscriptions]]
+        let request: [String: Any] = ["jsonrpc": "2.0", "id": "sub", "method": "events.subscribe", "params": [:]]
         Thread {
             do {
                 let socket = try LineSocket(path: path)
@@ -103,6 +106,17 @@ public final class HerdrClient: HerdrAPI {
         return subscription
     }
 
+    /// Adds the Claude Code session id of a local agent. Remote agents (`machine/t7`) have none here.
+    private func withSession(_ agent: Agent) -> Agent {
+        guard !agent.paneID.contains("/"), let pid = agent.foregroundPID else { return agent }
+        let file = claudeSessionsDir.appendingPathComponent("\(pid).json")
+        guard let data = try? Data(contentsOf: file),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return agent }
+        var agent = agent
+        agent.sessionID = json["sessionId"] as? String
+        return agent
+    }
+
     private func call(_ method: String, _ params: [String: Any]) async throws -> [String: Any] {
         let path = socketPath
         return try await withCheckedThrowingContinuation { continuation in
@@ -119,7 +133,7 @@ public final class HerdrClient: HerdrAPI {
     static func callSync(path: String, method: String, params: [String: Any]) throws -> [String: Any] {
         let socket = try LineSocket(path: path)
         defer { socket.close() }
-        let request: [String: Any] = ["id": UUID().uuidString, "method": method, "params": params]
+        let request: [String: Any] = ["jsonrpc": "2.0", "id": UUID().uuidString, "method": method, "params": params]
         try socket.writeLine(JSONSerialization.data(withJSONObject: request))
         guard let response = try JSONSerialization.jsonObject(with: socket.readLine()) as? [String: Any] else {
             throw HerdrError.badResponse
